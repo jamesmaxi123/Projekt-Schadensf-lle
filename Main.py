@@ -3,13 +3,13 @@ import pytesseract
 from pdf2image import convert_from_path
 import os
 
-# Tesseract-OCR-Pfad (anpassen, falls erforderlich)
-pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'  # Beispiel für macOS
+# Tesseract-OCR-Pfad
+pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
 
 # Funktion zur Extraktion von Daten aus einem Bild
 def extract_data_from_image(image):
     # OCR auf das Bild anwenden
-    text = pytesseract.image_to_string(image, lang='deu')  # 'deu' für Deutsch
+    text = pytesseract.image_to_string(image, lang='deu')
     return text
 
 # Funktion zur Verarbeitung einer PDF-Datei
@@ -23,8 +23,6 @@ def process_pdf(pdf_path):
     for image in images:
         text = extract_data_from_image(image)
 
-        # Hier die Logik zur Extraktion relevanter Daten hinzufügen
-        # Beispiel für die Extraktion von Daten durch reguläre Ausdrücke oder einfache String-Operationen:
         for line in text.splitlines():
             if "Versicherungsnummer" in line:
                 schadensmeldung_data["versicherungsnummer"] = line.split(":")[-1].strip()
@@ -43,8 +41,9 @@ def process_pdf(pdf_path):
             elif "Schadenbeschreibung" in line:
                 schadensmeldung_data["beschreibung"] = line.split(":")[-1].strip()
             elif "Schadenssumme" in line:
-                schadensmeldung_data["schaedenssumme"] = float(line.split(":")[-1].strip().replace("EUR", "").replace(",", ".").strip())
-
+                schadensmeldung_data["schadenssumme"] = float(line.split(":")[-1].strip().replace("EUR", "").replace(",", ".").strip())
+            elif "Telefonnummer" in line:
+                schadensmeldung_data["telefonnummer"] = line.split(":")[-1].strip()
 
     return schadensmeldung_data
 
@@ -54,29 +53,54 @@ def save_data_to_db(data):
     conn = sqlite3.connect('datenbank.db')
     cursor = conn.cursor()
 
-    # Tabelle erstellen (falls noch nicht vorhanden)
+    # Tabelle erstellen
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Versicherungsnehmer (
+    Versicherungsnehmer_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name VARCHAR(100),
+    Adresse VARCHAR(255),
+    Telefonnummer VARCHAR(20)
+);''')
+    
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Schadensmeldung (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        versicherungsnummer TEXT,
-        versicherungsnehmer TEXT,
-        adresse TEXT,
-        schadensnummer TEXT,
-        schadensdatum TEXT,
-        schadensart TEXT,
-        schadensort TEXT,
-        beschreibung TEXT,
-        schaedenssumme REAL
+        Schadens_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        Schadensnummer TEXT,
+        Schadensdatum DATE,
+        Schadensart TEXT,
+        Schadensort TEXT,
+        Beschreibung TEXT,
+        Schadenssumme TEXT,
+        Versicherungsnehmer_id INTEGER,
+        FOREIGN KEY (Versicherungsnehmer_id) REFERENCES Versicherungsnehmer(Versicherungsnehmer_id)
     )
     ''')
 
     # Daten in die Datenbank einfügen
+  
     cursor.execute('''
     INSERT INTO Schadensmeldung 
-    (versicherungsnummer, versicherungsnehmer, adresse, schadensnummer, schadensdatum, schadensart, schadensort, beschreibung, schaedenssumme)
-    VALUES (:versicherungsnummer, :versicherungsnehmer, :adresse, :schadensnummer, :schadensdatum, :schadensart, :schadensort, :beschreibung, :schaedenssumme)
+    (Schadensnummer, Schadensdatum, Schadensart, Schadensort, Beschreibung, Schadenssumme, Versicherungsnehmer_id)
+    VALUES (:schadensnummer, :schadensdatum, :schadensart, :schadensort, :beschreibung, :schadenssumme, :versicherungsnummer)
     ''', data)
-
+    
+    cursor.execute('''
+    INSERT INTO Versicherungsnehmer 
+    (Versicherungsnehmer_id, Name, Adresse, Telefonnummer)
+    VALUES (:versicherungsnummer, :versicherungsnehmer, :adresse, :telefonnummer)
+    ''', data)
+    
+    """
+    
+    
+ 
+    
+    cursor.execute('''
+    INSERT INTO Versicherungspolice 
+    (Versicherungsnummer, Versicherungsnehmer_id,)
+    VALUES (:versicherungsnummer, :versicherungsnehmer)
+    ''', data)
+    """
     # Änderungen speichern
     conn.commit()
     conn.close()
@@ -94,5 +118,5 @@ def main(pdf_folder):
 
 # Aufruf der Hauptfunktion
 if __name__ == "__main__":
-    pdf_folder = "/Users/MaxiRo/Desktop/ATIW/5 Block/Projekt Schadensfälle/PDF-Ordner"  # Hier den Pfad zu deinem PDF-Ordner angeben
+    pdf_folder = "/Users/MaxiRo/Desktop/ATIW/5 Block/Projekt Schadensfälle/PDF-Ordner"
     main(pdf_folder)
