@@ -172,7 +172,7 @@ def main():
     root.config(bg="#f4f4f9")
     
     # Titel-Label
-    title_label = Label(root, text="Schadensmeldung Datenbank", font=("Arial", 18, "bold"), bg="#f4f4f9", fg="#333")
+    title_label = Button(root, text="Schadensmeldung Datenbank", font=("Arial", 18, "bold"), bg="#f4f4f9", fg="#333")
     title_label.pack(pady=20)
 
     # Rahmen für die Inhalte
@@ -190,18 +190,16 @@ def main():
     folder_button.pack(pady=10)
 
     # Versicherungsnummer Suche
-    Label(frame, text="Versicherungsnummer suchen:", font=("Arial", 12), bg="#f44336",fg="white",).pack(pady=5)
     versicherung_entry = Entry(frame, font=("Arial", 12))
     versicherung_entry.pack(pady=5)
-    search_versicherung_button = Button(frame, text="Suchen", command=lambda: search_versicherungsnummer(versicherung_entry.get()), 
+    search_versicherung_button = Button(frame, text="Versicherungsnummer suchen", command=lambda: search_versicherungsnummer(versicherung_entry.get()), 
                                         font=("Arial", 12), bg="#FF9800", fg="white")
     search_versicherung_button.pack(pady=5)
 
     # Schadensnummer Suche
-    Label(frame, text="Schadensnummer suchen:", font=("Arial", 12), bg="#ffffff").pack(pady=5)
-    schaden_entry = Entry(frame, font=("Arial", 12))
+    schaden_entry = Entry(frame, font=("Arial", 12), bg="#FF9800", fg="white")
     schaden_entry.pack(pady=5)
-    search_schaden_button = Button(frame, text="Suchen", command=lambda: search_schadensnummer(schaden_entry.get()), 
+    search_schaden_button = Button(frame, text="Schadensnummer suchen", command=lambda: search_schadensnummer(schaden_entry.get()), 
                                    font=("Arial", 12), bg="#FF9800", fg="white")
     search_schaden_button.pack(pady=5)
 
