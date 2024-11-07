@@ -1,6 +1,45 @@
 from fpdf import FPDF
 
-# PDF-Generator-Funktion, um den hochgeladenen Stil zu replizieren
+# Funktion zur Erstellung einer leeren PDF-Vorlage
+def create_empty_template(file_name):
+    pdf = FPDF()
+    pdf.add_page()
+
+    # Titel
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "Versicherung Schadensmeldung", ln=True, align="C")
+    pdf.ln(10)
+
+    # Versicherungsdaten
+    pdf.set_font("Arial", "", 12)
+    pdf.cell(0, 10, "Versicherungsnehmer: _________________________", ln=True)
+    pdf.cell(0, 10, "Adresse: ___________________________________________", ln=True)
+    pdf.cell(0, 10, "Telefonnummer: _________________________", ln=True)
+    pdf.cell(0, 10, "Versicherungsnummer: _________________________", ln=True)
+    pdf.ln(5)
+
+    # Schadensdetails
+    pdf.cell(0, 10, "Schadensdatum: _________________________", ln=True)
+    pdf.cell(0, 10, "Schadensart: _________________________", ln=True)
+    pdf.cell(0, 10, "Schadensort: ___________________________________________", ln=True)
+    pdf.cell(0, 10, "Schadenbeschreibung: ___________________________________________", ln=True)
+    pdf.ln(5)
+
+    # Schadenhöhe und Belege
+    pdf.cell(0, 10, "Geschätzte Schadenssumme: _________________________ EUR", ln=True)
+    pdf.cell(0, 10, "Belege vorhanden: _________________________", ln=True)  # ohne Ja/Nein
+    pdf.ln(10)
+
+    # Datum Unterschrift
+    pdf.ln(10)
+    pdf.cell(0, 10, "Ort und Datum: __________________________", ln=True)
+    pdf.cell(0, 10, "Unterschrift: ____________________________", ln=True)
+
+    pdf.output(file_name)
+
+# Leere Vorlage speichern
+
+# PDF-Generator-Funktion
 def create_pdf(file_name, data):
     pdf = FPDF()
     pdf.add_page()
@@ -106,5 +145,7 @@ for i, daten in enumerate(beispiel_daten, start=1):
     file_name = f"/Users/MaxiRo/Desktop/ATIW/5 Block/Projekt Schadensfälle/Schadensmeldung_Beispiel_{i}.pdf"
     create_pdf(file_name, daten)
     file_names.append(file_name)
+create_empty_template("/Users/MaxiRo/Desktop/ATIW/5 Block/Projekt Schadensfälle/Schadensmeldung_Vorlage.pdf")
+file_names.append(file_name)
 
 file_names
