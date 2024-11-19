@@ -2,7 +2,8 @@ import sqlite3
 import pytesseract
 from pdf2image import convert_from_path
 import os
-from tkinter import Tk, filedialog, Button, Label, Frame, messagebox, Entry, StringVar, Text
+from tkinter import Tk, filedialog, Button, Label, Frame, messagebox, Entry, StringVar
+import hashlib
 
 
 # Tesseract-OCR-Pfad
@@ -97,15 +98,6 @@ def save_data_to_db(data):
     VALUES (:versicherungsnummer, :versicherungsnehmer, :adresse, :telefonnummer)
     ''', data)
     
-    cursor.execute('''
-    INSERT OR IGNORE INTO Benutzer 
-    (Name, Adresse, Telefonnummer, Passwort)
-    VALUES 
-    ('Maximilian Rothe', 'Ignaz-Perner-Straße 32', '01742195828', '$2b$12$abcdefghijklmnopqrstuvwxy.zABCDEFGHIJKLMOPQ1234567890'),
-    ('Anna Müller', 'Bahnhofstraße 45', '01761234567', '$2b$12$abcdefghijklmnopqrstuvwxy.zABCDEFGHIJKLMOPQ0987654321'),
-    ('Peter Schmidt', 'Hauptstraße 12', '01763456789', '$2b$12$abcdefghijklmnopqrstuvwxy.zABCDEFGHIJKLMOPQ1122334455') 
-    ''', data)
-    
     # Änderungen speichern
     conn.commit()
     conn.close()
@@ -157,9 +149,21 @@ def search_schadensnummer(schadensnummer):
         messagebox.showinfo("Ergebnis", f"Schadensnummer: {result[0]}, Datum: {result[1]}, Art: {result[2]}, Ort: {result[3]}, Summe: {result[5]} EUR, Versicherungsnummer: {result[6]}")
     else:
         messagebox.showinfo("Ergebnis", "Keine Daten zur Schadensnummer gefunden.")
+        
+# Anmeldefenster
+def validate_login(personalnummer, password):
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    conn = sqlite3.connect('datenbank.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT Passwort FROM Benutzer WHERE Personalnummer = ?', (personalnummer,))
+    result = cursor.fetchone()
+    conn.close()
+    if result and result[0] == hashed_password:
+        return True
+    return False
 
 # Hauptfenster der Anwendung erstellen
-def main():
+def main_window():
     root = Tk()
     root.title("Schadensmeldung Verarbeitung")
     root.geometry("600x500")
@@ -204,5 +208,32 @@ def main():
 
     root.mainloop()
 
+# Login-Fenster
+def login_window():
+    def attempt_login():
+        personalnummer = personalnummer_var.get()
+        password = password_var.get()
+        if validate_login(personalnummer, password):
+            login.destroy()
+            main_window()
+        else:
+            messagebox.showerror("Fehler", "Ungültige Personalnummer oder Passwort.")
+    
+    login = Tk()
+    login.title("Login")
+    login.geometry("300x200")
+    login.config(bg="#f4f4f9")
+
+    Button(login, text="Personalnummer:", bg="#f4f4f9").pack(pady=5)
+    personalnummer_var = StringVar()
+    Entry(login, textvariable=personalnummer_var).pack(pady=5)
+
+    Button(login, text="Passwort:", bg="#f4f4f9").pack(pady=5)
+    password_var = StringVar()
+    Entry(login, textvariable=password_var, show="*").pack(pady=5)
+
+    Button(login, text="Anmelden", command=attempt_login).pack(pady=10)
+    login.mainloop()
+
 if __name__ == "__main__":
-    main()
+    login_window()
