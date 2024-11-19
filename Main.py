@@ -60,7 +60,7 @@ def save_data_to_db(data):
     Name VARCHAR(100),
     Adresse VARCHAR(255),
     Telefonnummer VARCHAR(20)
-);''')
+    );''')
     
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Schadensmeldung (
@@ -74,9 +74,17 @@ def save_data_to_db(data):
         FOREIGN KEY (Versicherungsnehmer_id) REFERENCES Versicherungsnehmer(Versicherungsnehmer_id)
     )
     ''')
-
+    
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Benutzer (
+    Personalnummer INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name VARCHAR(100),
+    Adresse VARCHAR(255),
+    Telefonnummer VARCHAR(20),
+    Passwort VARCHAR(255) NOT NULL
+    );''')
+    
     # Daten in die Datenbank einfügen
-  
     cursor.execute('''
     INSERT INTO Schadensmeldung 
     (Schadensdatum, Schadensart, Schadensort, Beschreibung, Schadenssumme, Versicherungsnehmer_id)
@@ -89,29 +97,15 @@ def save_data_to_db(data):
     VALUES (:versicherungsnummer, :versicherungsnehmer, :adresse, :telefonnummer)
     ''', data)
     
-    """
-    # Hauptfunktion
-    def main(pdf_folder):
-    # Alle PDF-Dateien im angegebenen Ordner verarbeiten
-    for filename in os.listdir(pdf_folder):
-        if filename.endswith('.pdf'):
-            pdf_path = os.path.join(pdf_folder, filename)
-            print(f"Verarbeite {pdf_path}...")
-            schadensmeldung_data = process_pdf(pdf_path)
-            save_data_to_db(schadensmeldung_data)
-            print(f"Daten aus {pdf_path} wurden erfolgreich in die Datenbank eingefügt.")
-    
- # Aufruf der Hauptfunktion
-if __name__ == "__main__":
-    pdf_folder = "/Users/MaxiRo/Desktop/ATIW/5 Block/Projekt Schadensfälle/PDF-Ordner"
-    main(pdf_folder)
-    
     cursor.execute('''
-    INSERT INTO Versicherungspolice 
-    (Versicherungsnummer, Versicherungsnehmer_id,)
-    VALUES (:versicherungsnummer, :versicherungsnehmer)
+    INSERT OR IGNORE INTO Benutzer 
+    (Name, Adresse, Telefonnummer, Passwort)
+    VALUES 
+    ('Maximilian Rothe', 'Ignaz-Perner-Straße 32', '01742195828', '$2b$12$abcdefghijklmnopqrstuvwxy.zABCDEFGHIJKLMOPQ1234567890'),
+    ('Anna Müller', 'Bahnhofstraße 45', '01761234567', '$2b$12$abcdefghijklmnopqrstuvwxy.zABCDEFGHIJKLMOPQ0987654321'),
+    ('Peter Schmidt', 'Hauptstraße 12', '01763456789', '$2b$12$abcdefghijklmnopqrstuvwxy.zABCDEFGHIJKLMOPQ1122334455') 
     ''', data)
-    """
+    
     # Änderungen speichern
     conn.commit()
     conn.close()
