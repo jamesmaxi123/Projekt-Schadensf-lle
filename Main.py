@@ -2,7 +2,7 @@ import sqlite3
 import pytesseract
 from pdf2image import convert_from_path
 import os
-from tkinter import Tk, filedialog, Button, Label, Frame, messagebox, Entry, StringVar
+from tkinter import Tk, filedialog, Button, Frame, messagebox, Entry, StringVar
 import hashlib
 
 
